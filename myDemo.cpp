@@ -1,10 +1,3 @@
-/**
- * Demo file for the exercise on binary tree
- *
- * @author Evgeny Hershkovitch Neiterman
- * @since 2023-03
- */
-
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -12,7 +5,8 @@
 #include <cassert>
 using namespace std;
 
-#include "sources/Team.hpp" //no need for other includes
+#include "sources/SmartTeam.hpp" 
+#include "sources/Team.hpp"
 
 using namespace ariel;
 
@@ -28,12 +22,12 @@ int main() {
     sushi->move(tom);
     sushi->slash(tom);
 
-    Team team_A(tom); 
+    SmartTeam team_A(tom); 
     team_A.add(new YoungNinja("Yogi", Point(64,57)));
 
     // Team b(tom); should throw tom is already in team a
 
-     Team team_B(sushi);
+     SmartTeam team_B(sushi);
 
      team_B.add(new TrainedNinja("Hikari", Point(12,81)));
 

@@ -20,8 +20,8 @@ namespace ariel
             bool isInTeam;
             Character(const Character& other); 
             Character& operator=(const Character& other);
-            Character& operator=(Character&& other);
-            Character(Character&& other);
+            Character& operator=(Character&& other) noexcept;
+            Character(Character&& other) noexcept;
             Character(Point location, int hitPoint, string name);
             bool isAlive();
             double distance(Character *other) const;

@@ -17,7 +17,7 @@ namespace ariel
     }   
 
     // Move assignment operator
-    Ninja& Ninja::operator=(Ninja&& other) 
+    Ninja& Ninja::operator=(Ninja&& other) noexcept
     {
         if (this != &other) {
             Character::operator=(std::move(other));  // Call base class's move assignment operator

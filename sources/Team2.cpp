@@ -1,48 +1,64 @@
 #include <iostream>
 #include "Team2.hpp"
-#include <string>
-#include <vector>
-#include <climits>
-#include <stdexcept>
-#include "Character.hpp"
-#include "Cowboy.hpp"
-#include "Ninja.hpp"
 
+using namespace std;
+using namespace ariel;
 
+Team2::Team2(Character *leader) : Team(leader) {}
 
-namespace ariel
-{       
-        Team2::Team2(Character *leader):Team(leader){}
+void Team2::attack(Team *enemy) {
+	if (enemy == nullptr)
+		throw invalid_argument("Enemy is null");
 
-        // Copy assignment operator
-        Team2& Team2::operator=(const Team2& other) 
-        {
-                if (this != &other) 
-                {
-                        Team::operator=(other);  // Call base class's copy assignment operator
-                }
-                return *this;
-        }
+	else if (!enemy->stillAlive() || !stillAlive())
+		throw runtime_error("One of the teams is dead");
 
-        // Move assignment operator
-        Team2& Team2::operator=(Team2&& other) 
-        {
-                if (this != &other) 
-                {
-                        Team::operator=(std::move(other));  // Call base class's move assignment operator
-                }
-                return *this;
-        }
+	else if (!getLeader()->isAlive())
+		setLeader(closestMember());
 
-        void Team2::add(Character *teamMember)
-        {
-                if((this->teamMembers.size() == 10) || teamMember->hasTeam())
-                {
-                    throw std::runtime_error("");
-                }
-                this->teamMembers.push_back(teamMember);
-                teamMember->assignTeam();
-        }
+	Character *chosenVictom = chooseVictom(enemy);
 
-        Team2::~Team2(){}
+	for (Character *member : getTeamMembers())
+	{
+		if (!member->isAlive())
+			continue;
+
+		if (!chosenVictom->isAlive())
+		{
+			if (!enemy->stillAlive())
+				return;
+
+			chosenVictom = chooseVictom(enemy);
+		}
+
+		Cowboy *cowboy = dynamic_cast<Cowboy *>(member);
+
+		if (cowboy != nullptr)
+		{
+			if (cowboy->hasboolets())
+				cowboy->shoot(chosenVictom);
+
+			else
+				cowboy->reload();
+		}
+
+		else
+		{
+			Ninja *ninja = dynamic_cast<Ninja *>(member);
+
+			if (ninja != nullptr)
+			{
+				if (ninja->distance(chosenVictom) <= 1)
+					ninja->slash(chosenVictom);
+
+				else
+					ninja->move(chosenVictom);
+			}
+		}
+	}
+}
+
+void Team2::print() const {
+	for (Character *member : getTeamMembers())
+		cout << member->print() << endl;
 }

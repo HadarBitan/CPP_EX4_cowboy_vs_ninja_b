@@ -1,211 +1,230 @@
 #include <iostream>
+#include <limits>
 #include "Team.hpp"
-#include <string>
-#include <vector>
-#include <typeinfo>
-#include <stdexcept>
-#include <climits>
-#include "Cowboy.hpp"
-#include "Ninja.hpp"
-#include "YoungNinja.hpp"
-#include "TrainedNinja.hpp"
-#include "OldNinja.hpp"
 
+using namespace std;
+using namespace ariel;
 
-namespace ariel
-{
-        Team::Team(Character* leader)
-        {
-                if(leader->hasTeam())
-                {
-                        throw std::runtime_error("");
-                }
-                this->leader = leader;
-                if(typeid(leader) == typeid(Cowboy))
-                {
-                        this->teamMembers[0] = leader;
-                }
-                else
-                {
-                        this->teamMembers.push_back(leader);
-                }
-                leader->assignTeam();
-        }
+Team::Team(Character *leader): leader(leader) {
+	if (leader->hasTeam())
+		throw runtime_error("Leader already has a team");
 
-        // Copy assignment operator
-        Team& Team::operator=(const Team& other) 
-        {
-                if (this != &other) 
-                {
-                        teamMembers = other.teamMembers;  // Copy member variables
-                        leader = other.leader;
-                }
-                return *this;
-        }
+	teamMembers.push_back(leader);
+	leader->assignTeam();
+}
 
-        // Move assignment operator
-        Team& Team::operator=(Team&& other) 
-        {
-                if (this != &other) 
-                {
-                        teamMembers = std::move(other.teamMembers);  // Move member variables
-                        leader = std::move(other.leader);
-                }
-                return *this;
-        }
+Team::Team(const Team &other) {
+	for (Character *member : other.teamMembers)
+	{
+		Cowboy *cowboy = dynamic_cast<Cowboy *>(member);
+		Ninja *ninja = dynamic_cast<Ninja *>(member);
 
-        void Team::add(Character *teamMember)
-        {
-                if(this->teamMembers.size() == 10 || teamMember->hasTeam())
-                {
-                    throw std::runtime_error("");
-                }
-                if(typeid(teamMember) == typeid(Cowboy))
-                {
-                        std::vector<Character*>::size_type i = 0;
-                        while(typeid(this->teamMembers[i]) == typeid(Cowboy) || this->teamMembers[i] != nullptr)
-                        {
-                                i++;
-                        }
-                        this->teamMembers[i] = teamMember;
-                        teamMember->assignTeam();
-                }
-                else
-                {
-                        this->teamMembers.push_back(teamMember);
-                        teamMember->assignTeam();
-                }
-        }
-       
-        void Team::attack(Team *enemy)
-        {
-                if(enemy == nullptr)
-                {
-                        throw std::invalid_argument("");
-                }
-                if(!enemy->stillAlive() || !this->stillAlive())
-                {
-                        return;
-                }               
-                if(!this->leader->isAlive())
-                {
-                        Character *closestMember = this->closestMember(this->leader);
-                        this->leader = closestMember;
-                }
-                //// Find a new leader if the current one is dead
-                else{
-                         Character *newLeader = nullptr;
-                        double minDistance = INT_MAX;
-                        for (std::vector<Character*>::size_type i=0; i<this->teamMembers.size(); i++)
-                        {
-                        double dist = this->teamMembers[i]->distance(leader);
-                        if (this->teamMembers[i]->isAlive() && dist < minDistance)
-                        {
-                        newLeader = this->teamMembers[i];
-                        minDistance = dist;
-                        }
-                        }
+		if (cowboy != nullptr)
+			teamMembers.push_back(new Cowboy(*cowboy));
 
-                        leader = newLeader;
-                        }
-        
-                Character *chosenVictom = enemy->chooseVictom(this->leader);
-                for(std::vector<Character*>::size_type i=0; i<this->teamMembers.size(); i++)
-                {
-                        Cowboy *cowboy = dynamic_cast<Cowboy *>(this->teamMembers[i]);
-                        if(cowboy != nullptr)
-                        {
-                                if(!cowboy->hasboolets())
-                                {
-                                        cowboy->reload();
-                                }
-                                else
-                                {
-                                        cowboy->shoot(chosenVictom);
-                                }
-                        }
-                        else
-                        {
-                                Ninja *ninja = dynamic_cast<Ninja *>(this->teamMembers[i]);
-                                if(ninja->distance(chosenVictom) <= 1)
-                                {
-                                        ninja->slash(chosenVictom);
-                                }
-                                else
-                                {
-                                        ninja->move(chosenVictom);
-                                }
-                        }
-                        if(!chosenVictom->isAlive())
-                        {
-                                chosenVictom = enemy->chooseVictom(this->leader);
-                        }
-                        if(!enemy->stillAlive())
-                        {
-                                return;
-                        }
-                }
-        }
-       
-        int Team::stillAlive()
-        {
-                int countAlive = 0;
-                for(std::vector<Character*>::size_type  i = 0; i < this->teamMembers.size(); i++)
-                {
-                        if(this->teamMembers[i]->isAlive())
-                        {
-                                countAlive++;
-                        }
-                }
-                return countAlive;
-        }
-       
-        string Team::print()
-        {
-                string teamDetails = "";
-                for(std::vector<Character*>::size_type  i = 0; i < this->teamMembers.size(); i++)
-                {
-                        teamDetails += this->teamMembers[i]->print();
-                }
-                return teamDetails;
-        }
+		else if (ninja != nullptr)
+			teamMembers.push_back(new Ninja(*ninja));
 
-        Character* Team::closestMember(Character *leader)
-        {
-                int minDist = INT_MAX;
-                Character *choosenMem;
-                for(std::vector<Character*>::size_type i=0; i<this->teamMembers.size(); i++)
-                {
-                        if((this->teamMembers[i] != leader) && (this->teamMembers[i]->isAlive()) && (this->teamMembers[i]->distance(leader) < minDist))
-                        {
-                                minDist = this->teamMembers[i]->distance(leader);
-                                choosenMem = this->teamMembers[i];
-                        }
-                }
-                return choosenMem;
-        }
+		else
+			throw runtime_error("Unknown character type");	
+	}
 
-        Character* Team::chooseVictom(Character *leader)
-        {
-                int minDist = INT_MAX;
-                Character *choosenMem;
-                for(std::vector<Character*>::size_type i=0; i<this->teamMembers.size(); i++)
-                {
-                        if((this->teamMembers[i]->isAlive()) && (this->teamMembers[i]->distance(leader) < minDist))
-                        {
-                                minDist = this->teamMembers[i]->distance(leader);
-                                choosenMem = this->teamMembers[i];
-                        }
-                }
-                return choosenMem;
-        }
+	leader = teamMembers.front();
+}
 
-        Team::~Team()
-        {
-                for(std::vector<Character*>::size_type i = 0; i< this->teamMembers.size(); i++)
-                {
-                        delete this->teamMembers[i];
-                }
-                this->teamMembers.clear();
-        }
+Team::Team(Team &&other) noexcept {
+	teamMembers = std::move(other.teamMembers); // Move member variables
+	leader = other.leader;
+
+	other.leader = nullptr;
+}
+
+// Copy assignment operator
+Team &Team::operator=(const Team &other) {
+	if (this != &other)
+	{
+		for (Character *member : teamMembers)
+			delete member;
+
+		teamMembers.clear();
+
+		for (Character *member : other.teamMembers)
+		{
+			Cowboy *cowboy = dynamic_cast<Cowboy *>(member);
+			Ninja *ninja = dynamic_cast<Ninja *>(member);
+
+			if (cowboy != nullptr)
+				teamMembers.push_back(new Cowboy(*cowboy));
+
+			else if (ninja != nullptr)
+				teamMembers.push_back(new Ninja(*ninja));
+
+			else
+				throw runtime_error("Unknown character type");	
+		}
+
+		leader = teamMembers.front();
+	}
+	return *this;
+}
+
+// Move assignment operator
+Team &Team::operator=(Team &&other) noexcept {
+	if (this != &other)
+	{
+		teamMembers = std::move(other.teamMembers); // Move member variables
+		leader = std::move(other.leader);
+	}
+
+	return *this;
+}
+
+Team::~Team() {
+	for (Character *member : teamMembers)
+		delete member;
+
+	teamMembers.clear();
+}
+
+void Team::add(Character *teamMember) {
+	if (teamMembers.size() == 10 || teamMember->hasTeam())
+		throw runtime_error("Team is full or the character already has a team");
+
+	teamMembers.push_back(teamMember);
+	teamMember->assignTeam();
+}
+
+void Team::attack(Team *enemy) {
+	if (enemy == nullptr)
+		throw invalid_argument("Enemy is null");
+
+	else if (!enemy->stillAlive() || !stillAlive())
+		throw runtime_error("One of the teams is dead");
+
+	else if (!leader->isAlive())
+		leader = closestMember();
+
+	Character *chosenVictom = chooseVictom(enemy);
+
+	for (Character *member : teamMembers)
+	{
+		if (!member->isAlive())
+			continue;
+
+		if (!chosenVictom->isAlive())
+		{
+			if (!enemy->stillAlive())
+				return;
+
+			chosenVictom = chooseVictom(enemy);
+		}
+
+		Cowboy *cowboy = dynamic_cast<Cowboy *>(member);
+
+		if (cowboy != nullptr)
+		{
+			if (cowboy->hasboolets())
+				cowboy->shoot(chosenVictom);
+
+			else
+				cowboy->reload();
+		}
+	}
+
+	for (Character *member : teamMembers)
+	{
+		if (!member->isAlive())
+			continue;
+
+		if (!chosenVictom->isAlive())
+		{
+			if (!enemy->stillAlive())
+				return;
+
+			chosenVictom = chooseVictom(enemy);
+		}
+
+		Ninja *ninja = dynamic_cast<Ninja *>(member);
+
+		if (ninja != nullptr)
+		{
+			if (ninja->distance(chosenVictom) <= 1)
+				ninja->slash(chosenVictom);
+
+			else
+				ninja->move(chosenVictom);
+		}
+	}
+}
+
+int Team::stillAlive() {
+	int countAlive = 0;
+
+	for (Character *member : teamMembers)
+	{
+		if (member->isAlive())
+			countAlive++;
+	}
+
+	return countAlive;
+}
+
+void Team::print() const {
+	for (Character *member : teamMembers)
+	{
+		Cowboy *cowboy = dynamic_cast<Cowboy *>(member);
+
+		if (cowboy != nullptr)
+			cout << cowboy->print() << endl;
+	}
+
+	for (Character *member : teamMembers)
+	{
+		Ninja *ninja = dynamic_cast<Ninja *>(member);
+
+		if (ninja != nullptr)
+			cout << ninja->print() << endl;
+	}
+}
+
+Character *Team::closestMember() {
+	double minDist = numeric_limits<double>::max();
+	Character *choosenMem = nullptr;
+
+	for (Character *member : teamMembers)
+	{
+		if (!member->isAlive())
+			continue;
+
+		double dist = member->distance(leader);
+
+		if (dist < minDist)
+		{
+			minDist = dist;
+			choosenMem = member;
+		}
+	}
+
+	return choosenMem;
+}
+
+Character *Team::chooseVictom(Team *enemy) {
+	double minDist = numeric_limits<double>::max();
+	Character *choosenMem = nullptr;
+
+	for (Character *member : enemy->teamMembers)
+	{
+		if (!member->isAlive())
+			continue;
+
+		double dist = member->distance(leader);
+
+		if (dist < minDist)
+		{
+			minDist = dist;
+			choosenMem = member;
+		}
+	}
+
+	return choosenMem;
 }

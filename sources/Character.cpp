@@ -30,7 +30,7 @@ namespace ariel
         }
 
         // Move assignment operator
-        Character& Character::operator=(Character&& other) 
+        Character& Character::operator=(Character&& other) noexcept
         {
                 if (this != &other) 
                 {
@@ -43,7 +43,7 @@ namespace ariel
         }
 
         // Move constructor
-        Character::Character(Character&& other) 
+        Character::Character(Character&& other) noexcept
                 : location(std::move(other.location)),
                 hitPoint(std::move(other.hitPoint)),
                 name(std::move(other.name)),

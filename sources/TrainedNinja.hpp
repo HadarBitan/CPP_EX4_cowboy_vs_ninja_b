@@ -17,11 +17,6 @@ namespace ariel
     {
         public:
             TrainedNinja(string name, Point location): Ninja(location, hitPointTrained, std::move(name), SpeedTrained){}
-            TrainedNinja(const TrainedNinja& other); 
-            TrainedNinja& operator=(const TrainedNinja& other);
-            TrainedNinja& operator=(TrainedNinja&& other);
-            TrainedNinja(TrainedNinja&& other);
-            ~TrainedNinja() override {}
     };
 }
 

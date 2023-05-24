@@ -15,7 +15,7 @@ namespace ariel
     }
 
     // Move assignment operator
-    OldNinja& OldNinja::operator=(OldNinja&& other) 
+    OldNinja& OldNinja::operator=(OldNinja&& other) noexcept
     {
         if (this != &other) {
             Ninja::operator=(std::move(other));  // Call base class's move assignment operator
@@ -24,6 +24,6 @@ namespace ariel
     }
 
     // Move constructor
-    OldNinja::OldNinja(OldNinja&& other) : Ninja(std::move(other)) {}
+    OldNinja::OldNinja(OldNinja&& other) noexcept : Ninja(std::move(other)) {}
 
 }

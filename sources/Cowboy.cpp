@@ -17,7 +17,7 @@ namespace ariel
     }
 
     // Move assignment operator
-    Cowboy& Cowboy::operator=(Cowboy&& other) {
+    Cowboy& Cowboy::operator=(Cowboy&& other) noexcept {
         if (this != &other) {
             Character::operator=(std::move(other));  // Call base class's move assignment operator
             numOfBullets = std::move(other.numOfBullets); // Move Cowboy-specific member
@@ -53,7 +53,7 @@ namespace ariel
         {
             throw std::runtime_error("");
         }
-        this->numOfBullets += 6;
+        this->numOfBullets = 6;
     }
     
     int Cowboy::getNumOfBoolets(){return this->numOfBullets;}

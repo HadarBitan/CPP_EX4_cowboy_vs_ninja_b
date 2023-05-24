@@ -19,11 +19,11 @@ namespace ariel
         private:
             int numOfBullets;
         public:
-            Cowboy(string name, Point location): Character(location, 110, std::move(name)), numOfBullets(bullets){}
+            Cowboy(string name, Point location): Character(location, hitPointCowboy, std::move(name)), numOfBullets(bullets){}
             Cowboy(const Cowboy& other) : Character(other), numOfBullets(other.numOfBullets){}
             Cowboy& operator=(const Cowboy& other);
-            Cowboy& operator=(Cowboy&& other);
-            Cowboy(Cowboy&& other) : Character(std::move(other)), numOfBullets(std::move(other.numOfBullets)){}
+            Cowboy& operator=(Cowboy&& other) noexcept;
+            Cowboy(Cowboy&& other) noexcept : Character(std::move(other)), numOfBullets(other.numOfBullets){}
             void shoot(Character *enemy);
             bool hasboolets();
             void reload();

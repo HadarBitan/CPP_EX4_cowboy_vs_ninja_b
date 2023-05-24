@@ -1,12 +1,6 @@
-#ifndef TEAM_HPP
-#define TEAM_HPP
-
 #pragma once
 
-#include <iostream>
-#include <string>
 #include <vector>
-#include "Point.hpp"
 #include "Cowboy.hpp"
 #include "YoungNinja.hpp"
 #include "TrainedNinja.hpp"
@@ -14,25 +8,47 @@
 
 namespace ariel
 {
-    class Team
-    {
-        public:
-            vector<Character*> teamMembers;
-            Character * leader;
-            Team(const Team& other) : teamMembers(other.teamMembers), leader(other.leader){}
-            Team& operator=(const Team& other);
-            Team& operator=(Team&& other);
-            Team(Team&& other) : teamMembers(std::move(other.teamMembers)), leader(std::move(other.leader)){}
-            Team(Character *leader);
-            virtual void add(Character *teamMember);
-            virtual void attack(Team *enemy);
-            virtual int stillAlive();
-            virtual Character *closestMember(Character *leader);
-            virtual Character *chooseVictom(Character *leader);
-            virtual string print();
+	class Team
+	{
+		private:
+			Character *leader;
+			std::vector<Character *> teamMembers;
 
-            virtual ~Team();
-    };
+		protected:
+			Character *closestMember();
+			Character *chooseVictom(Team *enemy);
+
+		public:
+			Team(Character *leader);
+
+			Team(const Team &other);
+
+			Team(Team &&other) noexcept;
+
+			Team &operator=(const Team &other);
+
+			Team &operator=(Team &&other) noexcept;
+
+			virtual ~Team();
+
+			Character *getLeader() const {
+				return leader;
+			}
+
+			void setLeader(Character *newLeader) {
+				leader = newLeader;
+			}
+
+			const std::vector<Character *> &getTeamMembers() const {
+				return teamMembers;
+			}
+
+			void add(Character *teamMember);
+
+			int stillAlive();
+
+			virtual void attack(Team *enemy);
+
+			virtual void print() const;
+	};
 }
-
-#endif

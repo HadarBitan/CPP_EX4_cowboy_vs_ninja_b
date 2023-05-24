@@ -20,9 +20,9 @@ namespace ariel
             // Copy constructor
             Ninja(const Ninja& other) : Character(other), speed(other.speed){} 
             Ninja& operator=(const Ninja& other);
-            Ninja& operator=(Ninja&& other);
+            Ninja& operator=(Ninja&& other) noexcept;
             // Move constructor
-            Ninja(Ninja&& other) : Character(std::move(other)), speed(std::move(other.speed)){}
+            Ninja(Ninja&& other) noexcept : Character(std::move(other)), speed(other.speed){}
             void move(Character *enemy);
             void slash(Character *enemy);
             int getSpeed();
